@@ -15,11 +15,8 @@ COPY requirements.txt .
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Create and copy static directory
-COPY static/ ./static/
-
-# Copy the rest of the application
-COPY . .
+# Copy the application
+ADD . .
 
 # Expose the port the app runs on
 EXPOSE ${PORT}

@@ -37,10 +37,8 @@ lint:
 	$(PYTHON) -m black --diff *.py
 	$(PYTHON) -m isort --diff *.py
 
-black:
+black-sort:
 	$(PYTHON) -m black *.py
-
-isort:
 	$(PYTHON) -m isort *.py
 
 favicon:
@@ -49,7 +47,7 @@ favicon:
 test:
 	$(PYTEST) -v
 
-build: requirements lint test
+build: requirements lint test favicon
 	docker build --tag $(APP):$(TAG) .
 	docker tag $(APP):$(TAG) $(APP):latest
 
@@ -60,6 +58,9 @@ local-run:
 container-run:
 	@echo "http://localhost:$(PORT)"
 	docker run --rm -it --publish $(PORT):8000 --name $(APP) $(APP):latest
+
+list-image:
+	docker image ls | grep $(APP)
 
 clean:
 	docker container stop $(APP) || true

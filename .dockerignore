@@ -1,0 +1,41 @@
+# Git
+.git
+.gitignore
+.github
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.pytest_cache/
+.coverage
+htmlcov/
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Development
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Project specific
+Dockerfile
+.dockerignore
+README.md
+LICENSE
+Makefile
+development-requirements.txt
+create_favicon.py
+test_*.py
+
+# Build and distribution
+*.egg-info/
+dist/
+build/
