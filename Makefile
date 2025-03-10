@@ -44,7 +44,7 @@ black-sort:
 favicon:
 	$(PYTHON) create_favicon.py
 
-test:
+test-local:
 	$(PYTEST) -v
 
 build: requirements lint test favicon
@@ -59,15 +59,29 @@ container-run:
 	@echo "http://localhost:$(PORT)"
 	docker run --rm -it --publish $(PORT):8000 --name $(APP) $(APP):latest
 
+test-container-run:
+	docker container stop $(APP) || true
+	docker container rm $(APP) || true
+	@echo "http://localhost:$(PORT)"
+	docker run --rm -it --detach --publish $(PORT):8000 --name $(APP) $(APP):latest
+	@sleep 1
+	@curl -s "http://localhost:$(PORT)/today" | $(PYTHON) -m json.tool
+	@curl -s "http://localhost:$(PORT)/tomorrow" | $(PYTHON) -m json.tool
+	@curl -s "http://localhost:$(PORT)/lastnight" | $(PYTHON) -m json.tool | grep "Not Found"
+	@echo "Tests passed."
+	docker container stop $(APP)
+
 list-image:
 	docker image ls | grep $(APP)
 
-clean:
+stop:
 	docker container stop $(APP) || true
 	docker container rm $(APP) || true
+
+clean: stop
 	docker rmi $(APP):latest || true
 	docker rmi $(APP):$(TAG) || true
 	@rm -rf ./__pycache__ ./tests/__pycache__
 	@rm -f .*~ *.pyc
 
-.PHONY: build clean deploy help interactive lint requirements run test black isort
+.PHONY: help development-requirements requirements test lint black-sort favicon local-run container-run test-container-run list-image stop clean
