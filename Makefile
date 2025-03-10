@@ -47,19 +47,19 @@ favicon:
 test-local:
 	$(PYTEST) -v
 
+local:
+	@echo "http://localhost:$(PORT)"
+	uvicorn main:app --reload --host 0.0.0.0 --port=$(PORT)
+
 build: requirements lint test favicon
 	docker build --tag $(APP):$(TAG) .
 	docker tag $(APP):$(TAG) $(APP):latest
 
-local-run:
-	@echo "http://localhost:$(PORT)"
-	uvicorn main:app --reload --host 0.0.0.0 --port=$(PORT)
-
-container-run:
+container:
 	@echo "http://localhost:$(PORT)"
 	docker run --rm -it --publish $(PORT):8000 --name $(APP) $(APP):latest
 
-test-container-run:
+test-container:
 	docker container stop $(APP) || true
 	docker container rm $(APP) || true
 	@echo "http://localhost:$(PORT)"
@@ -70,6 +70,8 @@ test-container-run:
 	@curl -s "http://localhost:$(PORT)/lastnight" | $(PYTHON) -m json.tool | grep "Not Found"
 	@echo "Tests passed."
 	docker container stop $(APP)
+
+test: test-local test-container
 
 list-image:
 	docker image ls | grep $(APP)
