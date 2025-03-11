@@ -87,3 +87,30 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+  # PUSH THE CONTAINER IMAGE TO AWS ECR
+  push:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Short SHA
+        id: vars
+        run: echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Check outputs
+        run: echo ${{ steps.vars.outputs.SHA_SHORT }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::264318998405:role/GitHubAction-AssumeRoleWithAction
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Push to AWS ECR
+        uses: aws-actions/amazon-ecr-login@v2.0.1
+        with:
+          registry: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+      - name: Push to AWS ECR
+        run: |
+          docker tag  ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.IMAGE_NAME }}:${{ steps.vars.outputs.SHORT_SHA }}
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.IMAGE_NAME }}:${{ steps.vars.outputs.SHORT_SHA }}
