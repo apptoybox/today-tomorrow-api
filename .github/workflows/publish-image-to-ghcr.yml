@@ -90,6 +90,9 @@ jobs:
 
   # PUSH THE CONTAINER IMAGE TO AWS ECR
   push:
+    permissions:
+      id-token: write
+
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -106,11 +109,14 @@ jobs:
           role-to-assume: arn:aws:iam::264318998405:role/GitHubAction-AssumeRoleWithAction
           aws-region: ${{ secrets.AWS_REGION }}
 
+      - name: Pull the image
+        run: docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+
       - name: Push to AWS ECR
         uses: aws-actions/amazon-ecr-login@v2.0.1
         with:
           registry: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
       - name: Push to AWS ECR
         run: |
-          docker tag  ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.IMAGE_NAME }}:${{ steps.vars.outputs.SHORT_SHA }}
+          docker tag  $${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest {{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.IMAGE_NAME }}:${{ steps.vars.outputs.SHORT_SHA }}
           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.IMAGE_NAME }}:${{ steps.vars.outputs.SHORT_SHA }}
