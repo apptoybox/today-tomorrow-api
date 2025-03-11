@@ -1,0 +1,24 @@
+name: Test AWS GitHub OIDC
+
+on:
+  workflow_dispatch:
+
+env:
+  AWS_REGION : us-west-2
+
+permissions:
+      id-token: write
+
+jobs:
+  AssumeRoleAndCallIdentity:
+    runs-on: ubuntu-latest
+    steps:
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v4.1.0
+        with:
+          role-to-assume: "arn:aws:iam::264318998405:role/GitHubAction-AssumeRoleWithAction"
+          role-session-name: GitHub_to_AWS_via_FederatedOIDC
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Sts GetCallerIdentity
+        run: |
+          aws sts get-caller-identity

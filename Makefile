@@ -1,5 +1,8 @@
+REPO = $(shell git config --get remote.origin.url | cut -d: -f2 | cut -d. -f1)
+ECR = 264318998405.dkr.ecr.us-west-2.amazonaws.com
+REGISTRY = "$(ECR)/$(REPO)"
 APP = $(notdir $(CURDIR))
-TAG = $(shell echo "$$(date +%F)-$$(git rev-parse --short HEAD)")
+TAG = $(shell git rev-parse --short HEAD)
 DOCKER_REPO = ghcr.io/apptoybox
 
 PYTHON = $(VIRTUAL_ENV)/bin/python3
@@ -51,9 +54,14 @@ local:
 	@echo "http://localhost:$(PORT)"
 	uvicorn main:app --reload --host 0.0.0.0 --port=$(PORT)
 
+login:
+	aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin $(ECR)
+
 build: requirements lint test favicon
-	docker build --tag $(APP):$(TAG) .
-	docker tag $(APP):$(TAG) $(APP):latest
+	docker build --tag $(REPO):$(TAG) --tag $(REGISTRY):$(TAG) .
+
+push:
+	docker push $(REGISTRY):$(TAG)
 
 container:
 	@echo "http://localhost:$(PORT)"
