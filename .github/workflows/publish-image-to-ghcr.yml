@@ -91,11 +91,16 @@ jobs:
   # PUSH THE CONTAINER IMAGE TO AWS ECR
   push:
     permissions:
+      contents: read
       id-token: write
+      packages: read
 
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.1.1
+
       - name: Create Short SHA
         id: vars
         run: echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
@@ -109,13 +114,22 @@ jobs:
           role-to-assume: arn:aws:iam::264318998405:role/GitHubAction-AssumeRoleWithAction
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Pull the image
+      - name: Log into GHCR ${{ env.REGISTRY }}
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3.0.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull the image from GHCR
         run: docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
 
-      - name: Push to AWS ECR
+      - name: Log into AWS ECR
         uses: aws-actions/amazon-ecr-login@v2.0.1
         with:
           registry: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+
       - name: Push to AWS ECR
         run: |
           docker tag  $${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest {{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.IMAGE_NAME }}:${{ steps.vars.outputs.SHORT_SHA }}
