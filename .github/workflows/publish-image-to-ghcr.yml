@@ -64,7 +64,6 @@ jobs:
         uses: docker/metadata-action@v5.5.1
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: type=sha
 
       - name: Disply metadata
         run: |
@@ -121,7 +120,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Pull the image from GHCR
-        run: docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+        run: docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main
 
       - name: Log into AWS ECR
         uses: aws-actions/amazon-ecr-login@v2.0.1
@@ -130,5 +129,5 @@ jobs:
 
       - name: Push to AWS ECR
         run: |
-          docker tag  $${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} {{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          docker tag  $${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main {{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.IMAGE_NAME }}:${{ github.sha }}
           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.IMAGE_NAME }}:${{ github.sha }}
