@@ -64,6 +64,7 @@ jobs:
         uses: docker/metadata-action@v5.5.1
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: type=sha
 
       - name: Disply metadata
         run: |
@@ -106,6 +107,10 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::264318998405:role/GitHubAction-AssumeRoleWithAction
           aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Get Caller Identity from Security Token Service
+        run: |
+          aws sts get-caller-identity
 
       - name: Log into GHCR ${{ env.REGISTRY }}
         if: github.event_name != 'pull_request'
