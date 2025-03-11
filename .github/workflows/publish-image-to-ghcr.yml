@@ -57,6 +57,9 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Pull the image from GHCR
+        run: docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main
+
       # Extract metadata (tags, labels) for Docker
       # https://github.com/docker/metadata-action
       - name: Extract Docker metadata
@@ -129,5 +132,5 @@ jobs:
 
       - name: Push to AWS ECR
         run: |
-          docker tag  $${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main {{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          docker tag  ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main {{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.IMAGE_NAME }}:${{ github.sha }}
           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.IMAGE_NAME }}:${{ github.sha }}
