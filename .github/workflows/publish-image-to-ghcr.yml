@@ -132,5 +132,5 @@ jobs:
 
       - name: Push to AWS ECR
         run: |
-          docker tag  ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main {{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          docker tag  ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:main ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.IMAGE_NAME }}:${{ github.sha }}
           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.IMAGE_NAME }}:${{ github.sha }}
